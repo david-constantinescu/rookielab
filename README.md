@@ -1,4 +1,4 @@
-# NONAME — Interactive Lessons & Simulations (Flask)
+# RookieLab — Interactive Lessons & Simulations (Flask)
 
 A small Flask-based web application to host lessons, interactive lessons (with CAD viewer support), downloadable simulations, and simple user management via Auth0. It includes PDF generation for lessons, a Gemini AI chat proxy for lesson Q&A, quiz functionality, and integration with a cloud-hosted SQLite-like service (`sqlitecloud`).
 

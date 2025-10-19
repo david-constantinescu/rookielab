@@ -1,0 +1,348 @@
+/* General Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+    background-color: #f5f5f7;
+    color: #333;
+    line-height: 1.6;
+}
+
+/* Navigation Bar - Apple Style */
+.navbar {
+    background-color: rgba(255, 255, 255, 0.9);
+    height: 48px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    border-bottom: 1px solid #ddd;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
+}
+
+.navbar a {
+    color: #333;
+    text-decoration: none;
+    margin: 20;
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.navbar a:hover {
+    color: #0071e3;
+}
+
+.navbar a:last-child {
+    margin-right: 0;
+}
+
+.navbar a:first-child {
+    margin-left: 0;
+}
+
+/* Main Content */
+.content {
+    max-width: 980px;
+    margin: 80px auto 40px auto;
+    padding: 0 20px;
+}
+
+/* Headings */
+h1 {
+    font-size: 42px;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+h2 {
+    font-size: 28px;
+    font-weight: 500;
+    margin-bottom: 15px;
+}
+
+p {
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+/* Forms */
+form {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+form label {
+    font-weight: 500;
+    display: block;
+    margin-bottom: 10px;
+}
+
+form input, 
+form textarea {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+form button {
+    background-color: #0071e3;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-size: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+form button:hover {
+    background-color: #005bb5;
+}
+
+/* News and Lessons Items */
+.news-item, 
+.lesson-item {
+    background-color: #fff;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px;
+}
+
+.news-item h2, 
+.lesson-item h2 {
+    margin-bottom: 10px;
+}
+
+/* Download Button */
+.download-btn {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 12px 18px;
+    background-color: #0071e3;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+.download-btn:hover {
+    background-color: #005bb5;
+}
+
+/* Feedback Section */
+.feedback {
+    text-align: center;
+    margin-top: 50px;
+}
+
+.feedback textarea {
+    height: 120px;
+}
+
+/* Flash Messages */
+.flash-messages {
+    text-align: center;
+    margin: 20px auto;
+    padding: 15px;
+    background-color: #f0f9ff;
+    border-left: 5px solid #0071e3;
+    display: inline-block;
+    border-radius: 8px;
+}
+
+/* Sticky Footer */
+footer {
+    text-align: center;
+    padding: 20px 0;
+    font-size: 14px;
+    color: #555;
+}
+
+footer a {
+    color: #0071e3;
+    text-decoration: none;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
+
+.simulation-container {
+    text-align: center;
+    margin: 40px auto;
+}
+
+.simulation-image {
+    max-width: 80%;  /* Restricts width to around A4 proportions */
+    height: auto;    /* Maintains aspect ratio */
+    border: 1px solid #ddd;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+/* Dropdown Container */
+.dropdown {
+    position: static;  /* Prevents offset issues */
+    display: inline-block;
+}
+
+/* Dropdown Trigger */
+.dropdown > a {
+    cursor: pointer;
+    display: inline-block;
+    padding: 14px 20px;
+}
+
+/* Full-Screen Width Background */
+.dropdown-content {
+    display: none;
+    position: absolute;
+    top: 48px;  /* Right below the navbar */
+    left: 0;
+    width: 100%;  /* Full width of the screen */
+    background: rgba(255, 255, 255, 0.95);  /* Apple-like transparency */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    z-index: 1100;
+    padding: 40px 0;
+    text-align: center;
+}
+
+/* Dropdown Inner Content */
+.dropdown-inner {
+    display: flex;
+    justify-content: center;
+    gap: 80px;  /* Space between links */
+}
+
+/* Dropdown Links */
+.dropdown-content a {
+    display: inline-block;
+    padding: 16px 24px;
+    text-decoration: none;
+    color: #333;
+    font-size: 18px;
+    font-weight: 500;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+/* Hover Effects */
+.dropdown-content a:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+}
+
+/* Show Dropdown on Hover */
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+/* Blur Background Effect */
+body.blur-active .content,
+body.blur-active footer {
+    filter: blur(10px);
+    pointer-events: none;
+    transition: filter 0.3s ease;
+}
+
+/* Trigger Blur on Hover */
+.dropdown:hover ~ .content,
+.dropdown:hover ~ footer {
+    filter: blur(10px);
+}
+
+/* Expanding Search (icon -> input) */
+.search-container {
+    display: flex;
+    justify-content: flex-start; /* move control to left side */
+    margin: 20px 0 30px 0;
+}
+
+.search-control {
+    --bg: rgba(255,255,255,0.95);
+    --accent: #0071e3;
+    display: inline-flex;
+    align-items: center;
+    background: var(--bg);
+    /* squircle-like appearance when collapsed */
+    border-radius: 12px;
+    height: 44px;
+    padding: 6px 8px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.6);
+    transition: width 0.28s cubic-bezier(.2,.9,.2,1), box-shadow 0.18s, border-radius 0.18s;
+    width: 44px; /* compact square showing only icon */
+    overflow: hidden;
+    border: 1px solid rgba(0,0,0,0.06);
+}
+
+/* Expand on hover (primary) and on keyboard focus (accessibility) */
+.search-control:hover,
+.search-control:focus-within {
+    width: 420px; /* expanded width */
+    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    border-radius: 14px; /* slightly more rounded when expanded */
+}
+
+.search-icon {
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(0,0,0,0.55);
+    flex: 0 0 28px;
+}
+
+.search-input {
+    border: none;
+    outline: none;
+    background: transparent;
+    padding: 8px 10px 8px 6px;
+    font-size: 15px;
+    color: #111;
+    width: 0; /* collapsed */
+    transition: width 0.28s cubic-bezier(.2,.9,.2,1), opacity 0.18s;
+    opacity: 0;
+}
+
+.search-control:hover .search-input,
+.search-control:focus-within .search-input {
+    width: 320px; /* room for text inside expanded control */
+    opacity: 1;
+}
+
+.search-input::placeholder {
+    color: rgba(0,0,0,0.35);
+}
+
+/* When hovering the control also hint expansion */
+.search-control:hover {
+    box-shadow: 0 6px 22px rgba(0,0,0,0.09);
+}
+
+/* Accessible focus ring */
+.search-control:focus-within {
+    box-shadow: 0 8px 30px rgba(0,0,0,0.12), 0 0 0 3px rgba(0,113,227,0.08);
+}
+
+/* Small-screen tweaks */
+@media (max-width: 520px) {
+    .search-control:hover, .search-control:focus-within { width: calc(100% - 40px); }
+    .search-control:hover .search-input, .search-control:focus-within .search-input { width: calc(100% - 56px); }
+}

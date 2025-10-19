@@ -1,0 +1,932 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="interactive-lesson-container">
+        <h1>{{ lesson[1] }}</h1>
+        
+        <div class="split-screen{% if lesson[3] == 5 %} marketing-layout{% elif lesson[3] == 8 %} programming-layout{% endif %}">
+            <!-- Left half - Interactive Tools (3D Viewer for 3D & CAD, Photopea for Marketing) -->
+            <div class="viewer-panel">
+                {% if lesson[3] == 6 %}
+                    <!-- 3D & CAD - 3D Model Viewer -->
+                    <h3>3D Model Viewer</h3>
+                    {% if lesson[4] %}
+                        <div class="viewer-container">
+                            <iframe 
+                                id="cad-viewer" 
+                                src=""
+                                width="100%" 
+                                height="500px" 
+                                frameborder="0"
+                                allowfullscreen>
+                            </iframe>
+                            <div id="loading-message" style="text-align: center; padding: 20px; color: #666;">
+                                Loading 3D model...
+                            </div>
+                            <div class="viewer-controls">
+                                <button onclick="toggleFullscreen()" class="btn-secondary">Fullscreen</button>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="no-model">
+                            <p>No 3D model available for this lesson.</p>
+                        </div>
+                    {% endif %}
+                {% elif lesson[3] == 5 %}
+                    <!-- Marketing - Photopea Editor -->
+                    <h3>Photo Editor</h3>
+                    <div class="viewer-container">
+                        <iframe 
+                            id="photopea-viewer" 
+                            src="https://www.photopea.com/?utm_source=embed&utm_medium=iframe&utm_campaign=education"
+                            width="100%" 
+                            height="700px" 
+                            frameborder="0"
+                            allowfullscreen
+                            sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox">
+                        </iframe>
+                        <div class="viewer-controls">
+                            <button onclick="toggleFullscreen()" class="btn-secondary">Fullscreen</button>
+                        </div>
+                    </div>
+                {% elif lesson[3] == 8 %}
+                    <!-- Programming - Custom Code Server -->
+                    <h3>Code Editor</h3>
+                    <div class="viewer-container">
+                        <iframe 
+                            id="monaco-editor" 
+                            src=""
+                            width="100%" 
+                            height="700px" 
+                            frameborder="0"
+                            allowfullscreen
+                            allow="clipboard-read; clipboard-write; web-share; fullscreen"
+                            sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-downloads allow-top-navigation"
+                            referrerpolicy="no-referrer-when-downgrade">
+                        </iframe>
+                        <div id="code-server-loading" style="text-align: center; padding: 20px; color: #666;">
+                            Loading code editor...
+                        </div>
+                        <div class="viewer-controls">
+                            <button onclick="toggleFullscreen()" class="btn-secondary">Fullscreen</button>
+
+                            
+                            <select id="language-selector" onchange="changeMonacoLanguage(this.value)" class="btn-secondary" style="padding: 8px 12px; margin: 0 5px; border: 1px solid #ccc; border-radius: 4px; background: white;">
+                                <option value="java" selected>Java</option>
+                                <option value="python">Python</option>
+                                <option value="cpp">C++</option>
+                                <option value="html">HTML</option>
+                                <option value="css">CSS</option>
+                                <option value="javascript">JavaScript</option>
+                            </select>
+                            
+                            <select id="theme-selector" disabled class="btn-secondary" style="padding: 8px 12px; margin: 0 5px; border: 1px solid #ccc; border-radius: 4px; background: #f5f5f5; color: #666;">
+
+                            </select>
+                        </div>
+                    </div>
+                {% else %}
+                    <!-- Other departments - Interactive Content -->
+                    <h3>Interactive Content</h3>
+                    <div class="non-cad-content">
+                        <p>This lesson contains interactive content and quizzes.</p>
+                        <p>Use the lesson content on the right to learn and then take the quiz.</p>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Right half - Lesson Content -->
+            <div class="lesson-panel">
+                <h3>Lesson Content</h3>
+                <div class="lesson-content">
+                    {{ lesson[2] | render_images | safe }}
+                </div>
+                
+                <div class="lesson-actions">
+                    <button id="finish-lesson-btn" class="btn-primary" onclick="showQuiz()">
+                        Finished Lesson - Take Quiz
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quiz Section (Hidden initially) -->
+        <div id="quiz-section" class="quiz-container" style="display: none;">
+            <h2>Quiz: {{ lesson[1] }}</h2>
+            <div id="quiz-content">
+                <!-- Quiz questions will be loaded here -->
+            </div>
+            <div class="quiz-actions">
+                <button id="submit-quiz-btn" class="btn-primary" onclick="submitQuiz()" disabled>
+                    Submit Quiz
+                </button>
+            </div>
+        </div>
+        
+        <!-- Results Section (Hidden initially) -->
+        <div id="results-section" class="results-container" style="display: none;">
+            <h2>Quiz Results</h2>
+            <div id="score-display">
+                <!-- Score will be displayed here -->
+            </div>
+            <div class="results-actions">
+                <button class="btn-secondary" onclick="location.reload()">Retake Quiz</button>
+                <a href="{{ url_for('interactive_lessons') }}" class="btn-primary">Back to Lessons</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Chatbot Section -->
+    <div id="chatbot-section" style="margin-top: 30px; border-top: 2px solid #e0e0e0; padding-top: 20px;">
+        <h3>AI Assistant - Ask questions about this lesson</h3>
+        <div id="chat-container" style="height: 400px; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9; overflow-y: auto; padding: 15px; margin-bottom: 15px;">
+            <div id="chat-messages">
+                <div class="chat-message ai-message" style="background: #e3f2fd; padding: 10px; border-radius: 8px; margin-bottom: 10px; max-width: 80%;">
+                    <strong>AI Assistant:</strong> Hello! I'm here to help you with this lesson. You can ask me questions about the content, request explanations, or get help with any concepts covered. What would you like to know?
+                </div>
+            </div>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <input type="text" id="chat-input" placeholder="Ask a question about this lesson..." style="flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
+            <button onclick="sendMessage()" id="send-btn" style="padding: 12px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;">Send</button>
+            <button onclick="clearChat()" style="padding: 12px 20px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;">Clear</button>
+        </div>
+        <div id="chat-loading" style="display: none; text-align: center; padding: 10px; color: #666;">
+            AI is thinking...
+        </div>
+    </div>
+
+    <script>
+        let quizData = null;
+        let userAnswers = {};
+        let currentQuestion = 0;
+        let chatHistory = [];
+        
+        // Load quiz data and appropriate viewer when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadQuizData();
+            loadCADFile();
+            hidePhotopeaAds();
+            loadMonacoEditor();
+        });
+        
+        function hidePhotopeaAds() {
+            const lessonGrade = {{ lesson[3] if lesson[3] is not none else 'null' }};
+            if (lessonGrade === 5) { // Marketing lesson
+                const photopeaIframe = document.getElementById('photopea-viewer');
+                if (photopeaIframe) {
+                    // Try to hide ads by sending messages to the iframe
+                    photopeaIframe.onload = function() {
+                        try {
+                            // Send message to hide ads (this may not work due to CORS)
+                            photopeaIframe.contentWindow.postMessage({
+                                action: 'hideAds',
+                                source: 'education'
+                            }, 'https://www.photopea.com');
+                        } catch (e) {
+                            console.log('Cannot communicate with Photopea iframe due to CORS restrictions');
+                        }
+                    };
+                }
+            }
+        }
+        
+        
+        function loadMonacoEditor() {
+            const lessonGrade = {{ lesson[3] if lesson[3] is not none else 'null' }};
+            if (lessonGrade === 8) { // Programming lesson
+                const monacoIframe = document.getElementById('monaco-editor');
+                const loadingMessage = document.getElementById('code-server-loading');
+                
+                if (monacoIframe) {
+                    loadingMessage.innerHTML = 'Loading Monaco editor...';
+                    
+                    // Set the Monaco editor URL with initial code
+                    const initialCode = encodeURIComponent(`// Welcome to Java Programming
+// Start coding here...
+
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("Hello, World!");
+    }
+}`);
+                    
+                    monacoIframe.src = `https://embeddable-monaco.lukasbach.com?code=${initialCode}&language=java&theme=vs-light&contextmenu=true&folding=true&lineNumbers=on&minimap=true`;
+                    
+                    monacoIframe.onload = function() {
+                        loadingMessage.style.display = 'none';
+                        console.log('Monaco editor loaded - ready to use');
+                        
+                        // Set up message listener for Monaco editor
+                        window.addEventListener('message', handleMonacoMessage);
+                    };
+                    
+                    monacoIframe.onerror = function() {
+                        console.log('Failed to load Monaco editor');
+                        loadingMessage.innerHTML = 'Failed to load Monaco editor. Please try reloading.';
+                    };
+                }
+            }
+        }
+        
+        function handleMonacoMessage(event) {
+            if (event.origin !== 'https://embeddable-monaco.lukasbach.com') return;
+            
+            const data = event.data;
+            switch(data.type) {
+                case 'ready':
+                    console.log('Monaco editor is ready');
+                    break;
+                case 'change':
+                    console.log('Code changed:', data.value);
+                    break;
+            }
+        }
+        
+        function changeMonacoLanguage(language) {
+            const monacoIframe = document.getElementById('monaco-editor');
+            if (monacoIframe && monacoIframe.contentWindow) {
+                // Get appropriate initial code for each language
+                let initialCode = '';
+                switch(language) {
+                    case 'javascript':
+                        initialCode = `// Welcome to the RookieLab Integrated Code Editor!
+// Start coding here...`;
+                        break;
+                    case 'python':
+                        initialCode = `# Welcome to the RookieLab Integrated Code Editor!
+# Start coding here...`;
+                        break;
+                    case 'java':
+                        initialCode = `// Welcome to the RookieLab Integrated Code Editor!
+// Start coding here...`;
+                        break;
+                case 'cpp':
+                initialCode = `// Welcome to the RookieLab Integrated Code Editor!
+    // Start coding here...`;
+                break;
+                    case 'html':
+                        initialCode = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to the RookieLab Integrated Code Editor!</title>
+</head>
+<body>
+    <p>Start coding here...</p>
+</body>
+</html>`;
+                        break;
+                    case 'css':
+                        initialCode = `/* Welcome to the RookieLab Integrated Code Editor! */
+/* Start coding your styles here... */
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f0f0f0;
+}
+
+h1 {
+    color: #333;
+    text-align: center;
+}`;
+                        break;
+                }
+                
+                // Change the language and set new code
+                monacoIframe.contentWindow.postMessage({
+                    type: 'change-language',
+                    language: language
+                }, '*');
+                
+                // Set the new code
+                setTimeout(() => {
+                    monacoIframe.contentWindow.postMessage({
+                        type: 'change-value',
+                        value: initialCode
+                    }, '*');
+                }, 100);
+            }
+        }
+        
+        function changeMonacoTheme(theme) {
+            const monacoIframe = document.getElementById('monaco-editor');
+            if (monacoIframe && monacoIframe.contentWindow) {
+                monacoIframe.contentWindow.postMessage({
+                    type: 'change-theme',
+                    theme: theme
+                }, '*');
+            }
+        }
+        
+        function reloadMonacoEditor() {
+            const monacoIframe = document.getElementById('monaco-editor');
+            const loadingMessage = document.getElementById('code-server-loading');
+            
+            if (monacoIframe) {
+                loadingMessage.style.display = 'block';
+                loadingMessage.innerHTML = 'Reloading Monaco editor...';
+                
+                // Reload the Monaco editor
+                monacoIframe.src = monacoIframe.src;
+                
+                monacoIframe.onload = function() {
+                    loadingMessage.style.display = 'none';
+                    console.log('Monaco editor reloaded - ready to use');
+                };
+                
+                monacoIframe.onerror = function() {
+                    console.log('Failed to reload Monaco editor');
+                    loadingMessage.innerHTML = 'Failed to reload Monaco editor. Please try again.';
+                };
+            }
+        }
+        
+        
+        function loadCADFile() {
+            const lessonId = {{ lesson[0] if lesson[0] is not none else 'null' }};
+            const lessonGrade = {{ lesson[3] if lesson[3] is not none else 'null' }};
+            const iframe = document.getElementById('cad-viewer');
+            const loadingMessage = document.getElementById('loading-message');
+            
+            // Only load CAD file for 3D & CAD lessons (grade 6)
+            if (lessonGrade === 6) {
+                // Get the CAD file URL from our API
+                fetch(`/api/cad-url/${lessonId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.url) {
+                            // Load ViewSTL viewer with the CAD file
+                            loadViewSTL(data.url);
+                        } else {
+                            loadingMessage.innerHTML = 'No CAD file available for this lesson.';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error loading CAD file:', error);
+                        loadingMessage.innerHTML = 'Error loading 3D model. Please try again.';
+                    });
+            }
+        }
+        
+        function loadQuizData() {
+            const lessonId = {{ lesson[0] if lesson[0] is not none else 'null' }};
+            fetch(`/api/quiz/${lessonId}`)
+                .then(response => response.json())
+                .then(data => {
+                    quizData = data;
+                })
+                .catch(error => {
+                    console.error('Error loading quiz:', error);
+                });
+        }
+        
+        function showQuiz() {
+            if (!quizData || !quizData.questions || quizData.questions.length === 0) {
+                alert('No quiz available for this lesson.');
+                return;
+            }
+            
+            document.getElementById('quiz-section').style.display = 'block';
+            document.getElementById('finish-lesson-btn').style.display = 'none';
+            renderQuiz();
+        }
+        
+        function renderQuiz() {
+            const quizContent = document.getElementById('quiz-content');
+            quizContent.innerHTML = '';
+            
+            quizData.questions.forEach((question, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question-container';
+                questionDiv.innerHTML = `
+                    <h4>Question ${index + 1}: ${question.question}</h4>
+                    <div class="options">
+                        ${question.options.map((option, optIndex) => `
+                            <label class="option-label">
+                                <input type="radio" name="question_${index}" value="${optIndex}" onchange="selectAnswer(${index}, ${optIndex})">
+                                ${option}
+                            </label>
+                        `).join('')}
+                    </div>
+                `;
+                quizContent.appendChild(questionDiv);
+            });
+            
+            document.getElementById('submit-quiz-btn').disabled = false;
+        }
+        
+        function selectAnswer(questionIndex, optionIndex) {
+            userAnswers[questionIndex] = optionIndex;
+            checkAllAnswered();
+        }
+        
+        function checkAllAnswered() {
+            const totalQuestions = quizData.questions.length;
+            const answeredQuestions = Object.keys(userAnswers).length;
+            document.getElementById('submit-quiz-btn').disabled = answeredQuestions < totalQuestions;
+        }
+        
+        function submitQuiz() {
+            const totalQuestions = quizData.questions.length;
+            let correctAnswers = 0;
+            
+            quizData.questions.forEach((question, index) => {
+                if (userAnswers[index] === question.correct_answer) {
+                    correctAnswers++;
+                }
+            });
+            
+            const score = Math.round((correctAnswers / totalQuestions) * 10);
+            
+            // Send results to server
+            fetch('/api/submit-quiz', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    lesson_id: {{ lesson[0] if lesson[0] is not none else 'null' }},
+                    score: score,
+                    total_questions: totalQuestions,
+                    answers: userAnswers
+                })
+            });
+            
+            // Show results
+            showResults(score, totalQuestions, correctAnswers);
+        }
+        
+        function showResults(score, totalQuestions, correctAnswers) {
+            document.getElementById('quiz-section').style.display = 'none';
+            document.getElementById('results-section').style.display = 'block';
+            
+            const scoreDisplay = document.getElementById('score-display');
+            scoreDisplay.innerHTML = `
+                <div class="score-summary">
+                    <h3>Your Score: ${score}/10</h3>
+                    <p>Correct Answers: ${correctAnswers}/${totalQuestions}</p>
+                    <p>Percentage: ${Math.round((correctAnswers / totalQuestions) * 100)}%</p>
+                    <div class="score-bar">
+                        <div class="score-fill" style="width: ${(score / 10) * 100}%"></div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function loadViewSTL(url) {
+            const iframe = document.getElementById('cad-viewer');
+            const loadingMessage = document.getElementById('loading-message');
+            
+            if (iframe) {
+                // Use ViewSTL embeddable viewer with URL parameter
+                const viewerUrl = `https://www.viewstl.com/?embedded&url=${encodeURIComponent(url)}`;
+                iframe.src = viewerUrl;
+                
+                // Hide loading message when iframe loads
+                iframe.onload = function() {
+                    loadingMessage.style.display = 'none';
+                };
+                
+                loadingMessage.innerHTML = 'Loading 3D model...';
+            }
+        }
+        
+        function toggleFullscreen() {
+            // Determine which viewer is active based on lesson type
+            const lessonGrade = {{ lesson[3] if lesson[3] is not none else 'null' }};
+            let viewerContainer;
+            
+            if (lessonGrade === 6) {
+                // 3D & CAD lesson - use CAD viewer container
+                const cadViewer = document.getElementById('cad-viewer');
+                if (cadViewer) {
+                    viewerContainer = cadViewer.parentElement;
+                }
+            } else if (lessonGrade === 5) {
+                // Marketing lesson - use Photopea viewer container
+                const photopeaViewer = document.getElementById('photopea-viewer');
+                if (photopeaViewer) {
+                    viewerContainer = photopeaViewer.parentElement;
+                }
+            } else if (lessonGrade === 8) {
+                // Programming lesson - use Monaco editor container
+                const monacoEditor = document.getElementById('monaco-editor');
+                if (monacoEditor) {
+                    viewerContainer = monacoEditor.parentElement;
+                }
+            }
+            
+            if (viewerContainer) {
+                if (!document.fullscreenElement) {
+                    // Enter fullscreen
+                    if (viewerContainer.requestFullscreen) {
+                        viewerContainer.requestFullscreen();
+                    } else if (viewerContainer.webkitRequestFullscreen) {
+                        viewerContainer.webkitRequestFullscreen();
+                    } else if (viewerContainer.msRequestFullscreen) {
+                        viewerContainer.msRequestFullscreen();
+                    }
+                } else {
+                    // Exit fullscreen
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                    } else if (document.webkitExitFullscreen) {
+                        document.webkitExitFullscreen();
+                    } else if (document.msExitFullscreen) {
+                        document.msExitFullscreen();
+                    }
+                }
+            }
+        }
+        
+        // Chatbot Functions
+        function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            // Add user message to chat
+            addMessageToChat(message, 'user');
+            input.value = '';
+            
+            // Show loading
+            const loading = document.getElementById('chat-loading');
+            loading.style.display = 'block';
+            
+            // Disable send button
+            const sendBtn = document.getElementById('send-btn');
+            sendBtn.disabled = true;
+            sendBtn.textContent = 'Sending...';
+            
+            // Get lesson content and images
+            const lessonContent = document.querySelector('.lesson-content').innerHTML;
+            const lessonTitle = '{{ lesson[1] }}';
+            const imageUrls = extractImageUrls(lessonContent);
+            
+            // Prepare context for AI
+            const context = {
+                lesson_title: lessonTitle,
+                lesson_content: lessonContent,
+                image_urls: imageUrls,
+                user_message: message,
+                chat_history: chatHistory
+            };
+            
+            // Send to backend
+            fetch('/api/chat-with-gemini', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(context)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    addMessageToChat(data.response, 'ai');
+                    // Update chat history
+                    chatHistory.push({role: 'user', content: message});
+                    chatHistory.push({role: 'assistant', content: data.response});
+                } else {
+                    addMessageToChat('Sorry, I encountered an error. Please try again.', 'ai');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                addMessageToChat('Sorry, I encountered an error. Please try again.', 'ai');
+            })
+            .finally(() => {
+                loading.style.display = 'none';
+                sendBtn.disabled = false;
+                sendBtn.textContent = 'Send';
+            });
+        }
+        
+        function addMessageToChat(message, sender) {
+            const chatMessages = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-message ${sender}-message`;
+            
+            const senderName = sender === 'user' ? 'You' : 'AI Assistant';
+            const bgColor = sender === 'user' ? '#d4edda' : '#e3f2fd';
+            const align = sender === 'user' ? 'right' : 'left';
+            // add specific class for user message text coloring
+            if (sender === 'user') {
+                messageDiv.classList.add('user-message');
+            }
+            
+            messageDiv.style.cssText = `
+                background: ${bgColor};
+                padding: 10px;
+                border-radius: 8px;
+                margin-bottom: 10px;
+                max-width: 80%;
+                margin-left: ${sender === 'user' ? 'auto' : '0'};
+                margin-right: ${sender === 'user' ? '0' : 'auto'};
+                word-wrap: break-word;
+            `;
+            
+            messageDiv.innerHTML = `<strong>${senderName}:</strong> ${message}`;
+            chatMessages.appendChild(messageDiv);
+            
+            // Scroll to bottom
+            const chatContainer = document.getElementById('chat-container');
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+        
+        function extractImageUrls(content) {
+            const imgRegex = /<img[^>]+src="([^"]+)"/g;
+            const urls = [];
+            let match;
+            
+            while ((match = imgRegex.exec(content)) !== null) {
+                urls.push(match[1]);
+            }
+            
+            return urls;
+        }
+        
+        function clearChat() {
+            const chatMessages = document.getElementById('chat-messages');
+            chatMessages.innerHTML = `
+                <div class="chat-message ai-message" style="background: #e3f2fd; padding: 10px; border-radius: 8px; margin-bottom: 10px; max-width: 80%;">
+                    <strong>AI Assistant:</strong> Hello! I'm here to help you with this lesson. You can ask me questions about the content, request explanations, or get help with any concepts covered. What would you like to know?
+                </div>
+            `;
+            chatHistory = [];
+        }
+        
+        // Allow Enter key to send message
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatInput = document.getElementById('chat-input');
+            if (chatInput) {
+                chatInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        sendMessage();
+                    }
+                });
+            }
+        });
+    </script>
+
+    <style>
+        .interactive-lesson-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .split-screen {
+            display: flex;
+            gap: 40px;
+            margin: 20px 0;
+            height: 85vh;
+        }
+        
+        .viewer-panel {
+            flex: 3; /* Make all viewers wider by default */
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            background: #f9f9f9;
+            display: flex;
+            flex-direction: column;
+            min-width: 0; /* Allow flex item to shrink */
+        }
+
+        .lesson-panel {
+            flex: 1.5; /* Make lesson content narrower by default */
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            background: #f9f9f9;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Marketing lessons - extremely wide Photopea, wider lesson content */
+        .marketing-layout .viewer-panel {
+            flex: 5; /* Make Photopea extremely wide */
+        }
+        
+        .marketing-layout .lesson-panel {
+            flex: 2; /* Make lesson content wider too */
+        }
+        
+        /* Programming lessons - extremely wide VSCode, lesson content on right */
+        .programming-layout .viewer-panel {
+            flex: 4; /* Make VSCode extremely wide for landscape coding */
+        }
+        
+        .programming-layout .lesson-panel {
+            flex: 1.5; /* Make lesson content narrower but still readable */
+        }
+        
+        /* Try to hide ads in Photopea iframe */
+        #photopea-viewer {
+            filter: contrast(1.1) brightness(1.05);
+        }
+        
+        .viewer-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            /* allow viewers to size naturally instead of forcing a square */
+            min-height: 360px;
+            max-width: 100%;
+        }
+
+        /* Programming lessons (Monaco) should be taller for comfortable coding */
+        .programming-layout .viewer-container {
+            min-height: 620px;
+        }
+        
+        .viewer-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 4px;
+            background: #fff;
+        }
+        
+        .viewer-controls {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .no-model {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .non-cad-content {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin: 20px;
+        }
+        
+        .non-cad-content p {
+            margin: 10px 0;
+            font-size: 16px;
+        }
+        
+        .lesson-content {
+            flex: 1;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+        
+        .lesson-actions {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .quiz-container, .results-container {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+        
+        .question-container {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 5px;
+            background: white;
+        }
+        
+        .options {
+            margin: 10px 0;
+        }
+        
+        .option-label {
+            display: block;
+            margin: 8px 0;
+            padding: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .option-label:hover {
+            background: #f0f0f0;
+        }
+        
+        .option-label input[type="radio"] {
+            margin-right: 8px;
+        }
+        
+        .score-summary {
+            text-align: center;
+        }
+        
+        .score-bar {
+            width: 100%;
+            height: 20px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .score-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
+            transition: width 0.3s ease;
+        }
+        
+        .btn-primary, .btn-secondary {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+        }
+        
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+        
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+        
+        @media (max-width: 768px) {
+            .split-screen {
+                flex-direction: column;
+            }
+            
+            /* Reset marketing and programming layouts on mobile - stack vertically */
+            .marketing-layout .viewer-panel,
+            .marketing-layout .lesson-panel,
+            .programming-layout .viewer-panel,
+            .programming-layout .lesson-panel {
+                flex: 1;
+            }
+        }
+        
+        /* Fullscreen styles */
+        .viewer-container:fullscreen {
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            padding: 0;
+        }
+        
+        .viewer-container:fullscreen iframe {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .viewer-container:-webkit-full-screen {
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            padding: 0;
+        }
+        
+        .viewer-container:-webkit-full-screen iframe {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .viewer-container:-moz-full-screen {
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            padding: 0;
+        }
+        
+        .viewer-container:-moz-full-screen iframe {
+            width: 100%;
+            height: 100%;
+        }
+        /* Chat message colors */
+        .chat-message.user-message {
+            color: #bdbdbd; /* light gray text for user messages */
+        }
+    </style>
+{% endblock %}

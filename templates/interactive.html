@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h1>Interactive Lessons</h1>
+
+<div class="search-container">
+    <label class="search-control" aria-label="Search simulations">
+        <span class="search-icon" aria-hidden="true">
+            <!-- simple magnifying glass SVG -->
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zm8.7 15.3L20 20l-1.3-1.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </span>
+        <input class="search-input" type="text" id="search-simulari" placeholder="Caută simulări..." oninput="searchSimulari()" aria-label="Caută simulări">
+    </label>
+</div>
+
+<div id="simulari-list">
+    {% if simulations %}
+        <ul>
+            {% for simulation in simulations %}
+                <li>
+                    <h2>{{ simulation[1] }}</h2>  <!-- Simulation Title -->
+                    <p>{{ simulation[3] }}</p>   <!-- Simulation Description -->
+                    <a href="{{ url_for('simulare_view', simul_id=simulation[0]) }}">Do the Interactive Lesson</a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>There are no interactive lessons.</p>
+    {% endif %}
+</div>
+
+<script>
+function searchSimulari() {
+    var input = document.getElementById('search-simulari');
+    var filter = input.value.toUpperCase();
+    var list = document.getElementById('simulari-list');
+    var items = list.getElementsByTagName('li');
+
+    for (var i = 0; i < items.length; i++) {
+        var title = items[i].getElementsByTagName('h2')[0].textContent;
+        var description = items[i].getElementsByTagName('p')[0].textContent;
+
+        if (title.toUpperCase().indexOf(filter) > -1 || description.toUpperCase().indexOf(filter) > -1) {
+            items[i].style.display = '';
+        } else {
+            items[i].style.display = 'none';
+        }
+    }
+}
+</script>
+
+{% endblock %}

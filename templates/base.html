@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>   
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZDYQ8ZCP92"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    
+      gtag('config', 'G-ZDYQ8ZCP92');
+    </script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9591721492031714"
+     crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta charset="UTF-8">
+    <title>RookieLab</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}">
+    <link rel="manifest" href="{{ url_for('static', filename='site.webmanifest') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="theme-color" content="#ffffff">
+</head>
+<body>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const dropdown = document.querySelector('.dropdown');            
+        // Add blur on hover
+        dropdown.addEventListener('mouseenter', function () {
+                document.body.classList.add('blur-active');
+        });
+        
+        // Remove blur when hover ends
+        dropdown.addEventListener('mouseleave', function () {
+            document.body.classList.remove('blur-active');
+        });
+    });
+    </script>
+    <nav class="navbar">
+        <a href="/">Home</a>
+        <div class="dropdown">
+            <a href="/simulari">Tests & Interactive</a>
+            <div class="dropdown-content">
+                <div class="dropdown-inner">
+                    <a href="{{ url_for('interactive_lessons', grade=5) }}">Marketing</a>
+                    <a href="{{ url_for('interactive_lessons', grade=6) }}">3D & CAD</a>
+                    <a href="{{ url_for('interactive_lessons', grade=7) }}">Hardware</a>
+                    <a href="{{ url_for('interactive_lessons', grade=8) }}">Programming</a>
+                </div>
+            </div>
+        </div>
+        <div class="dropdown">
+        <a href="/lessons">Lessons</a>  
+        <div class="dropdown-content">
+            <div class="dropdown-inner">
+                <a href="{{ url_for('lessons', grade=5) }}">Marketing</a>
+                <a href="{{ url_for('lessons', grade=6) }}">3D & CAD</a>
+                <a href="{{ url_for('lessons', grade=7) }}">Hardware</a>
+                <a href="{{ url_for('lessons', grade=8) }}">Programming</a>
+            </div>
+        </div>
+    </div>
+        <a href="/contact">Contact</a>
+        {% if 'user' in session %}
+            <a href="{{ url_for('account') }}">Account</a>
+            {% if session.get('is_admin') %}
+                <a href="{{ url_for('admin') }}">Admin</a>
+            {% endif %}
+            <a href="/logout">Logout</a>
+        {% else %}
+        <a href="{{ url_for('signup') }}" class="signup-btn">Sign Up</a>
+            <a href="{{ url_for('login') }}" class="login-btn">Login</a>
+        {% endif %}
+    </nav>
+    <div class="content">
+        {% block content %}{% endblock %}
+    </div>
+
+    <footer>
+        <p>&copy; 2025 RookieLab | <a href="/policy">Privacy Policy</a> | <a href="/terms">Terms and Conditions</a></p>
+    </footer>
+    
+</body>
+</html>

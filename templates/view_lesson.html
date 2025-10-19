@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>{{ lesson[1] }}</h1>
+    <div class="lesson-content">
+        {{ lesson[2] | render_images | safe }}
+    </div>
+    {% if 'user' in session %}
+        <a href="{{ url_for('generate_lesson_pdf', lesson_id=lesson[0]) }}">Generate PDF</a>
+    {% else %}
+        <a href="{{ url_for('login') }}">Login to download the PDF version of this lesson.</a>
+    {% endif %}
+{% endblock %}

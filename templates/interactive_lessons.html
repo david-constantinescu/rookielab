@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Interactive Lessons</h1>
+
+    <div class="search-container">
+        <label class="search-control" aria-label="Search interactive lessons">
+            <span class="search-icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zm8.7 15.3L20 20l-1.3-1.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </span>
+            <input class="search-input" type="text" id="search-interactive-lessons" placeholder="Search for Interactive Lessons" oninput="searchInteractiveLessons()" aria-label="Search for Interactive Lessons">
+        </label>
+    </div>
+
+    <div id="interactive-lessons-list">
+        {% if interactive_lessons %}
+            <ul>
+                {% for lesson in interactive_lessons %}
+                    <li>
+                        <h2><a href="{{ url_for('view_interactive_lesson', lesson_id=lesson[0]) }}">{{ lesson[1] }}</a></h2>  <!-- Lesson Title -->
+                        <div class="lesson-preview">
+                            {{ lesson[2] | render_images | safe }}
+                        </div>
+                        <div class="lesson-meta">
+                            <span class="lesson-type">Interactive Lesson</span>
+                            {% if lesson[4] %}
+                                <span class="cad-available">3D Model Available</span>
+                            {% endif %}
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p> </p>
+            <p> </p>
+            <p> </p>
+            <p>There are no interactive lessons available at this time.</p>
+        {% endif %}
+    </div>
+
+    <script>
+    function searchInteractiveLessons() {
+        var input = document.getElementById('search-interactive-lessons');
+        var filter = input.value.toUpperCase();
+        var list = document.getElementById('interactive-lessons-list');
+        var items = list.getElementsByTagName('li');
+
+        for (var i = 0; i < items.length; i++) {
+            var title = items[i].getElementsByTagName('h2')[0].textContent;
+            var content = items[i].getElementsByTagName('div')[0].textContent;
+
+            if (title.toUpperCase().indexOf(filter) > -1 || content.toUpperCase().indexOf(filter) > -1) {
+                items[i].style.display = '';
+            } else {
+                items[i].style.display = 'none';
+            }
+        }
+    }
+    </script>
+
+    <style>
+        .lesson-meta {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .lesson-type {
+            background: #007bff;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .cad-available {
+            background: #28a745;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        #interactive-lessons-list ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        #interactive-lessons-list li {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            background: #f9f9f9;
+            transition: box-shadow 0.3s ease;
+        }
+        
+        #interactive-lessons-list li:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        #interactive-lessons-list h2 {
+            margin-top: 0;
+            color: #333;
+        }
+        
+        #interactive-lessons-list h2 a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        
+        #interactive-lessons-list h2 a:hover {
+            text-decoration: underline;
+        }
+        
+        .lesson-preview {
+            margin: 10px 0;
+            color: #666;
+            line-height: 1.5;
+        }
+    </style>
+
+{% endblock %}

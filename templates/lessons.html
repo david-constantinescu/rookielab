@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Lessons</h1>
+
+    <div class="search-container">
+        <label class="search-control" aria-label="Search lessons">
+            <span class="search-icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zm8.7 15.3L20 20l-1.3-1.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </span>
+            <input class="search-input" type="text" id="search-lessons" placeholder="Search for Lessons" oninput="searchLessons()" aria-label="Search for Lessons">
+        </label>
+    </div>
+
+    <div id="lessons-list">
+        {% if lessons %}
+            <ul>
+                {% for lesson in lessons %}
+                    <li>
+                        <h2><a href="{{ url_for('view_lesson', lesson_id=lesson[0]) }}">{{ lesson[1] }}</a></h2>  <!-- Lesson Title -->
+                        <div class="lesson-preview">
+                            {{ lesson[2] | render_images | safe }}
+                        </div>
+                        {% if 'user' in session %}
+                            <a href="{{ url_for('generate_lesson_pdf', lesson_id=lesson[0]) }}">Generate PDF version</a>
+                        {% else %}
+                            <a href="{{ url_for('login') }}">Login to download PDF version</a>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p> </p>
+            <p> </p>
+            <p> </p>
+            <p>There are no lessons available at this time.</p>
+        {% endif %}
+    </div>
+
+    <script>
+    function searchLessons() {
+        var input = document.getElementById('search-lessons');
+        var filter = input.value.toUpperCase();
+        var list = document.getElementById('lessons-list');
+        var items = list.getElementsByTagName('li');
+
+        for (var i = 0; i < items.length; i++) {
+            var title = items[i].getElementsByTagName('h2')[0].textContent;
+            var content = items[i].getElementsByTagName('div')[0].textContent;
+
+            if (title.toUpperCase().indexOf(filter) > -1 || content.toUpperCase().indexOf(filter) > -1) {
+                items[i].style.display = '';
+            } else {
+                items[i].style.display = 'none';
+            }
+        }
+    }
+    </script>
+
+{% endblock %}

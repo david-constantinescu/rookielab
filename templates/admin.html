@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% block content %}
+
+{% if is_admin %}
+<h1>Admin Panel</h1>
+
+<div class="admin-nav">
+    <a href="{{ url_for('admin') }}" class="admin-nav-btn">Regular Lesson</a>
+    <a href="{{ url_for('add_interactive_lesson') }}" class="admin-nav-btn">Interactive Lessons</a>
+</div>
+
+<h1>Admin - Add Lesson</h1>
+<form method="post" action="{{ url_for('add_lesson') }}">
+    <label>Lesson Title</label>
+    <input type="text" name="title" required>
+    
+    <label>Lesson Contents (for image use this or and image from bottom part: [img]https://link-to-cdn-stored-file...):</label>
+    <textarea name="content" rows="20" id="lessonContent" required></textarea>
+
+    <label>Dep't</label>
+    <select name="grade" required>
+        <option value="5">Marketing</option>
+        <option value="6">3D & CAD</option>
+        <option value="7">Hardware</option>
+        <option value="8">Programming</option>
+    </select>
+    
+    <button type="submit">Add Lesson</button>
+    <button type="button" onclick="addImageURL()">Add Image</button>
+</form>
+
+<script>
+// Insert image URL at the cursor position in the content field
+function addImageURL() {
+    var lessonContent = document.getElementById('lessonContent');
+    var imgURL = prompt("Introduceți link-ul imaginii (CDN):");
+    if (imgURL) {
+        var cursorPos = lessonContent.selectionStart;
+        var textBefore = lessonContent.value.substring(0, cursorPos);
+        var textAfter = lessonContent.value.substring(cursorPos, lessonContent.value.length);
+        lessonContent.value = textBefore + `\n[img]${imgURL}\n` + textAfter;
+    }
+}
+</script>
+
+<h1>⠀
+    ⠀
+    ⠀
+    ⠀
+    ⠀
+    ⠀
+    ⠀
+    ⠀
+    ⠀
+    ⠀
+    ⠀
+    ⠀
+    ⠀
+    ⠀
+
+    ⠀
+    ⠀
+    ⠀
+    ⠀
+    ⠀
+    ⠀
+    ⠀
+    ⠀
+    ⠀
+    ⠀
+
+</h1>
+
+<h1>Feedback Received</h1>
+<div id="feedback-list">
+    {% if feedback %}
+        <ul>
+            {% for item in feedback %}
+                <li>Email: {{ item[2] }}</li>
+                <li>Message: {{ item[1] }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>You haven't yet received any Feedback.</p>
+    {% endif %}
+</div>
+
+{% else %}
+<h1>Access Denied</h1>
+<p>You do not have permission to access this page.</p>
+{% endif %}
+
+<style>
+.admin-nav {
+    display: flex;
+    gap: 10px;
+    margin: 20px 0;
+    padding: 10px 0;
+    border-bottom: 2px solid #eee;
+}
+
+.admin-nav-btn {
+    padding: 10px 20px;
+    background: #007bff;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background 0.3s;
+}
+
+.admin-nav-btn:hover {
+    background: #0056b3;
+    color: white;
+    text-decoration: none;
+}
+
+.admin-nav-btn:first-child {
+    background: #6c757d;
+}
+
+.admin-nav-btn:first-child:hover {
+    background: #545b62;
+}
+</style>
+
+{% endblock %}

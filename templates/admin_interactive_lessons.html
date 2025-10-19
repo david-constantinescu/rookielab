@@ -1,0 +1,278 @@
+{% extends 'base.html' %}
+{% block content %}
+
+{% if is_admin %}
+<h1>Admin - Add Interactive Lesson</h1>
+<form method="post" action="{{ url_for('add_interactive_lesson') }}" id="interactive-lesson-form">
+    <label>Lesson Title:</label>
+    <input type="text" name="title" required>
+    
+    <label>Lesson Contents (for image use: [img]https://link-to-cdn-stored-file...):</label>
+    <textarea name="content" rows="15" id="lessonContent" required></textarea>
+
+    <label>Department:</label>
+    <select name="grade" id="department-select" required onchange="toggleCADField()">
+        <option value="5">Marketing</option>
+        <option value="6">3D & CAD</option>
+        <option value="7">Hardware</option>
+        <option value="8">Programming</option>
+    </select>
+    
+    <div id="cad-field-container" style="display: none;">
+        <label>3D CAD File URL (CDN):</label>
+        <input type="url" name="cad_file_url" placeholder="https://your-cdn.com/model.stl">
+    </div>
+    
+    <h3>Quiz Questions</h3>
+    <div id="quiz-questions-container">
+        <div class="question-group">
+            <label>Question 1:</label>
+            <input type="text" name="question_0" placeholder="Enter question text">
+            <div class="options-container">
+                <input type="text" name="question_0_option_0" placeholder="Option A">
+                <input type="text" name="question_0_option_1" placeholder="Option B">
+                <input type="text" name="question_0_option_2" placeholder="Option C">
+                <input type="text" name="question_0_option_3" placeholder="Option D">
+            </div>
+            <label>Correct Answer:</label>
+            <select name="question_0_correct">
+                <option value="0">A</option>
+                <option value="1">B</option>
+                <option value="2">C</option>
+                <option value="3">D</option>
+            </select>
+        </div>
+    </div>
+    
+    <button type="button" onclick="addQuestion()">Add Question</button>
+    <button type="button" onclick="addImageURL()">Add Image</button>
+    <button type="submit">Add Interactive Lesson</button>
+</form>
+
+<h1>⠀
+    ⠀
+    ⠀
+    ⠀
+    ⠀
+    ⠀
+    ⠀
+    ⠀
+    ⠀
+    ⠀
+    ⠀
+    ⠀
+    ⠀
+    ⠀
+    ⠀
+    ⠀
+
+    ⠀
+    ⠀
+    ⠀
+    ⠀
+    ⠀
+    ⠀
+    ⠀
+    ⠀
+    ⠀
+    ⠀
+
+</h1>
+
+<h1>Existing Interactive Lessons</h1>
+<div id="interactive-lessons-list">
+    {% if interactive_lessons %}
+        <ul>
+            {% for lesson in interactive_lessons %}
+                <li>
+                    <h3>{{ lesson[1] }}</h3>
+                    <p><strong>Department:</strong> 
+                        {% if lesson[3] == 5 %}Marketing
+                        {% elif lesson[3] == 6 %}3D & CAD
+                        {% elif lesson[3] == 7 %}Hardware
+                        {% elif lesson[3] == 8 %}Programming
+                        {% endif %}
+                    </p>
+                    {% if lesson[4] %}
+                        <p><strong>3D Model:</strong> <a href="{{ lesson[4] }}" target="_blank">View CAD File</a></p>
+                    {% endif %}
+                    <p><strong>Content Preview:</strong> {{ lesson[2][:200] }}...</p>
+                    <a href="{{ url_for('view_interactive_lesson', lesson_id=lesson[0]) }}" target="_blank">View Lesson</a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No interactive lessons have been created yet.</p>
+    {% endif %}
+</div>
+
+<script>
+let questionCount = 1;
+
+// Insert image URL at the cursor position in the content field
+function addImageURL() {
+    var lessonContent = document.getElementById('lessonContent');
+    var imgURL = prompt("Enter the image URL (CDN):");
+    if (imgURL) {
+        var cursorPos = lessonContent.selectionStart;
+        var textBefore = lessonContent.value.substring(0, cursorPos);
+        var textAfter = lessonContent.value.substring(cursorPos, lessonContent.value.length);
+        lessonContent.value = textBefore + `\n[img]${imgURL}\n` + textAfter;
+    }
+}
+
+function addQuestion() {
+    const container = document.getElementById('quiz-questions-container');
+    const questionGroup = document.createElement('div');
+    questionGroup.className = 'question-group';
+    questionGroup.innerHTML = `
+        <label>Question ${questionCount + 1}:</label>
+        <input type="text" name="question_${questionCount}" placeholder="Enter question text">
+        <div class="options-container">
+            <input type="text" name="question_${questionCount}_option_0" placeholder="Option A">
+            <input type="text" name="question_${questionCount}_option_1" placeholder="Option B">
+            <input type="text" name="question_${questionCount}_option_2" placeholder="Option C">
+            <input type="text" name="question_${questionCount}_option_3" placeholder="Option D">
+        </div>
+        <label>Correct Answer:</label>
+        <select name="question_${questionCount}_correct">
+            <option value="0">A</option>
+            <option value="1">B</option>
+            <option value="2">C</option>
+            <option value="3">D</option>
+        </select>
+        <button type="button" onclick="removeQuestion(this)">Remove Question</button>
+    `;
+    container.appendChild(questionGroup);
+    questionCount++;
+    
+    // Update hidden input for question count
+    updateQuestionCount();
+}
+
+function removeQuestion(button) {
+    button.parentElement.remove();
+    updateQuestionCount();
+}
+
+function updateQuestionCount() {
+    // Update the question count in the form
+    const existingInput = document.querySelector('input[name="question_count"]');
+    if (existingInput) {
+        existingInput.value = questionCount;
+    } else {
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'question_count';
+        hiddenInput.value = questionCount;
+        document.getElementById('interactive-lesson-form').appendChild(hiddenInput);
+    }
+}
+
+// Initialize question count
+updateQuestionCount();
+
+function toggleCADField() {
+    const departmentSelect = document.getElementById('department-select');
+    const cadFieldContainer = document.getElementById('cad-field-container');
+    
+    if (departmentSelect.value === '6') { // 3D & CAD
+        cadFieldContainer.style.display = 'block';
+    } else {
+        cadFieldContainer.style.display = 'none';
+    }
+}
+</script>
+
+<style>
+.question-group {
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 5px;
+    background: #f9f9f9;
+}
+
+.options-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 10px 0;
+}
+
+.options-container input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+
+.question-group label {
+    display: block;
+    margin: 5px 0;
+    font-weight: bold;
+}
+
+.question-group input[type="text"] {
+    width: 100%;
+    padding: 8px;
+    margin: 5px 0;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+
+.question-group select {
+    padding: 8px;
+    margin: 5px 0;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+
+.question-group button {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.question-group button:hover {
+    background: #c82333;
+}
+
+#interactive-lessons-list ul {
+    list-style: none;
+    padding: 0;
+}
+
+#interactive-lessons-list li {
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 5px;
+    background: #f9f9f9;
+}
+
+#interactive-lessons-list h3 {
+    margin-top: 0;
+    color: #333;
+}
+
+#interactive-lessons-list a {
+    color: #007bff;
+    text-decoration: none;
+    margin-right: 15px;
+}
+
+#interactive-lessons-list a:hover {
+    text-decoration: underline;
+}
+</style>
+
+{% else %}
+<h1>Access Denied</h1>
+<p>You do not have permission to access this page.</p>
+{% endif %}
+
+{% endblock %}

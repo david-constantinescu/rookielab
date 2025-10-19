@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="simulation-container">
+        <h1>{{ title }}</h1>
+        {% if image_path %}
+            <div class="pdf-viewer-container">
+                <img src="{{ url_for('static', filename=image_path) }}" alt="Prima pagină a simulării" class="simulation-image">
+            </div>
+        {% endif %}
+
+        <div class="info">
+            {% if not is_logged_in %}
+                <p><strong>Conectați-vă</strong> pentru a vedea simularea completă.</p>
+            {% else %}
+                <a href="{{ link }}" class="download-btn">Descarcă simularea</a>
+                {% if solution_link %}
+                    <a href="{{ solution_link }}" class="download-btn">Descarcă soluția</a>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
